@@ -1,1 +1,21 @@
 ## Nonobot IRC Adapter
+
+IRC adapter for Nonobot
+
+### Configuration for Nonobot standalone
+
+Nonobot Verticle config:
+
+----
+{
+  "irc.channels": "#chan1,#chan2,etc..."
+}
+----
+
+or as ENV variable:
+
+----
+export IRC_CHANNELS=#chan1,#chan2,etc...
+----
+
+Other link:src/main/asciidoc/dataobjects.adoc[options]
