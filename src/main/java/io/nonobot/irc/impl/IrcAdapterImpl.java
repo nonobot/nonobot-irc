@@ -61,7 +61,7 @@ public class IrcAdapterImpl implements IrcAdapter {
         BotClient client = ar1.result();
         String name = options.getName();
         if (name == null) {
-          name = client.name();
+          name = bot.name();
         }
         Configuration.Builder<PircBotX> config = new Configuration.Builder<>().
             setName(name).
@@ -116,6 +116,7 @@ public class IrcAdapterImpl implements IrcAdapter {
 
     @Override
     public void onConnect(ConnectEvent<PircBotX> event) throws Exception {
+      client.rename(event.getBot().getNick());
       if (!completion.isComplete()) {
         completion.complete();
       }
@@ -128,17 +129,12 @@ public class IrcAdapterImpl implements IrcAdapter {
 
     @Override
     public void onMessage(MessageEvent<PircBotX> event) throws Exception {
-      String msg = event.getMessage();
-      String mynick = event.getBot().getNick();
-      if (msg.length() > mynick.length() + 1 && msg.startsWith(mynick) && isSep(msg.charAt(mynick.length()))) {
-        msg = client.name() + msg.substring(mynick.length());
-      }
-      processMessage(event, msg);
+      processMessage(event, event.getMessage());
     }
 
     @Override
     public void onPrivateMessage(PrivateMessageEvent<PircBotX> event) throws Exception {
-      processMessage(event, client.name() + " " + event.getMessage());
+      processMessage(event, event.getMessage());
     }
 
     private void processMessage(GenericUserEvent<PircBotX> event, String msg) {
@@ -185,11 +181,6 @@ public class IrcAdapterImpl implements IrcAdapter {
       }
     }
   }
-
-  private static boolean isSep(char c) {
-    return Character.isWhitespace(c) || c == ':';
-  }
-
 
   private static final SocketFactory SOCKET_FACTORY = new SocketFactory() {
 
