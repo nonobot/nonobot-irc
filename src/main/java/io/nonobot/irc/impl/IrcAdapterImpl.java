@@ -56,7 +56,7 @@ public class IrcAdapterImpl implements IrcAdapter {
         });
       });
     }
-    bot.client(ar1 -> {
+    bot.createClient(ar1 -> {
       if (ar1.succeeded()) {
         BotClient client = ar1.result();
         String name = options.getName();

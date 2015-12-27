@@ -1,10 +1,10 @@
-require 'nonobot/adapter'
+require 'nonobot/bot_adapter'
 require 'nonobot/nono_bot'
 require 'vertx/util/utils.rb'
 # Generated from io.nonobot.irc.IrcAdapter
 module NonobotIrc
   #  @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
-  class IrcAdapter < ::Nonobot::Adapter
+  class IrcAdapter < ::Nonobot::BotAdapter
     # @private
     # @param j_del [::NonobotIrc::IrcAdapter] the java delegate
     def initialize(j_del)

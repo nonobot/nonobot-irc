@@ -19,13 +19,13 @@ import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
 import io.nonobot.irc.IrcOptions
-import io.nonobot.groovy.core.adapter.Adapter
+import io.nonobot.groovy.core.adapter.BotAdapter
 import io.nonobot.groovy.core.NonoBot
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
 */
 @CompileStatic
-public class IrcAdapter extends Adapter {
+public class IrcAdapter extends BotAdapter {
   private final def io.nonobot.irc.IrcAdapter delegate;
   public IrcAdapter(Object delegate) {
     super((io.nonobot.irc.IrcAdapter) delegate);

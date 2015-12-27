@@ -2,18 +2,18 @@ package io.nonobot.irc;
 
 import io.nonobot.core.Config;
 import io.nonobot.core.NonoBot;
-import io.nonobot.core.adapter.Adapter;
-import io.nonobot.core.spi.AdapterFactory;
+import io.nonobot.core.adapter.BotAdapter;
+import io.nonobot.core.spi.BotAdapterFactory;
 
 import java.util.Arrays;
 
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
-public class IrcAdapterFactory implements AdapterFactory {
+public class IrcAdapterFactory implements BotAdapterFactory {
 
   @Override
-  public Adapter create(NonoBot bot, Config config) {
+  public BotAdapter create(NonoBot bot, Config config) {
     String ircChannels = config.getProperty("irc.channels");
     if (ircChannels != null) {
       IrcOptions options = new IrcOptions();

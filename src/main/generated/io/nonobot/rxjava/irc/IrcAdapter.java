@@ -20,7 +20,7 @@ import java.util.Map;
 import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.nonobot.irc.IrcOptions;
-import io.nonobot.rxjava.core.adapter.Adapter;
+import io.nonobot.rxjava.core.adapter.BotAdapter;
 import io.nonobot.rxjava.core.NonoBot;
 
 /**
@@ -30,7 +30,7 @@ import io.nonobot.rxjava.core.NonoBot;
  * NOTE: This class has been automatically generated from the {@link io.nonobot.irc.IrcAdapter original} non RX-ified interface using Vert.x codegen.
  */
 
-public class IrcAdapter extends Adapter {
+public class IrcAdapter extends BotAdapter {
 
   final io.nonobot.irc.IrcAdapter delegate;
 
