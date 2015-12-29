@@ -1,13 +1,11 @@
 package io.nonobot.irc.impl;
 
+import io.nonobot.core.client.ReceiveOptions;
 import io.nonobot.irc.IrcOptions;
-import io.nonobot.core.NonoBot;
 import io.nonobot.irc.IrcAdapter;
 import io.nonobot.core.client.BotClient;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.ListenerAdapter;
@@ -27,65 +25,37 @@ import java.net.Socket;
  */
 public class IrcAdapterImpl implements IrcAdapter {
 
-  private final NonoBot bot;
   private final IrcOptions options;
   private Runner runner;
-  private Handler<Void> closeHandler;
 
-  public IrcAdapterImpl(NonoBot bot, IrcOptions options) {
-    this.bot = bot;
+  public IrcAdapterImpl(IrcOptions options) {
     this.options = new IrcOptions(options);
   }
 
   @Override
-  public void connect() {
-    connect(null);
-  }
-
-  @Override
-  public synchronized void connect(Handler<AsyncResult<Void>> completionHandler) {
+  public void connect(BotClient client, Future<Void> completionHandler) {
     if (runner != null) {
       throw new IllegalStateException();
     }
-    Context context = bot.vertx().getOrCreateContext();
-    Future<Void> completion = Future.future();
-    if (completionHandler != null) {
-      completion.setHandler(ar2 -> {
-        context.runOnContext(v -> {
-          completionHandler.handle(ar2);
-        });
-      });
+    Context context = client.bot().vertx().getOrCreateContext();
+    String name = options.getName();
+    if (name == null) {
+      name = client.bot().name();
     }
-    bot.createClient(ar1 -> {
-      if (ar1.succeeded()) {
-        BotClient client = ar1.result();
-        String name = options.getName();
-        if (name == null) {
-          name = bot.name();
-        }
-        Configuration.Builder<PircBotX> config = new Configuration.Builder<>().
-            setName(name).
-            setNickservPassword(options.getNickServPassword()).
-            setSocketTimeout(options.getSocketTimeout()).
-            setServerHostname(options.getHost()).
-            setServerPort(options.getPort()).
-            setAutoNickChange(true).
-            setAutoReconnect(false).
-            setSocketFactory(SOCKET_FACTORY);
-        for (String channel : options.getChannels()) {
-          config = config.addAutoJoinChannel(channel);
-        }
-        runner = new Runner(client, config, context, completion);
-        runner.thread.start();
-      } else {
-        completion.fail(ar1.cause());
-      }
-    });
-  }
-
-  @Override
-  public synchronized void closeHandler(Handler<Void> handler) {
-    this.closeHandler = handler;
+    Configuration.Builder<PircBotX> config = new Configuration.Builder<>().
+        setName(name).
+        setNickservPassword(options.getNickServPassword()).
+        setSocketTimeout(options.getSocketTimeout()).
+        setServerHostname(options.getHost()).
+        setServerPort(options.getPort()).
+        setAutoNickChange(true).
+        setAutoReconnect(false).
+        setSocketFactory(SOCKET_FACTORY);
+    for (String channel : options.getChannels()) {
+      config = config.addAutoJoinChannel(channel);
+    }
+    runner = new Runner(client, config, context, completionHandler);
+    runner.thread.start();
   }
 
   @Override
@@ -139,7 +109,7 @@ public class IrcAdapterImpl implements IrcAdapter {
 
     private void processMessage(GenericUserEvent<PircBotX> event, String msg) {
       System.out.println("Processing IRC message by " + event.getUser().getNick() + ": " + msg);
-      client.process(msg, ar -> {
+      client.receiveMessage(new ReceiveOptions(), msg, ar -> {
         if (ar.succeeded()) {
           String reply = ar.result();
           context.executeBlocking(fut -> {
@@ -153,16 +123,10 @@ public class IrcAdapterImpl implements IrcAdapter {
     }
 
     private void handleClose() {
-      Handler<Void> handler;
       synchronized (IrcAdapterImpl.this) {
-        handler = closeHandler;
         runner = null;
       }
-      if (handler != null) {
-        context.runOnContext(v -> {
-          handler.handle(null);
-        });
-      }
+      client.close();
     }
 
     @Override

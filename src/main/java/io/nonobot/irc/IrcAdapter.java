@@ -1,6 +1,5 @@
 package io.nonobot.irc;
 
-import io.nonobot.core.NonoBot;
 import io.nonobot.core.adapter.BotAdapter;
 import io.nonobot.irc.impl.IrcAdapterImpl;
 import io.vertx.codegen.annotations.VertxGen;
@@ -11,8 +10,8 @@ import io.vertx.codegen.annotations.VertxGen;
 @VertxGen
 public interface IrcAdapter extends BotAdapter {
 
-  static IrcAdapter create(NonoBot bot, IrcOptions options) {
-    return new IrcAdapterImpl(bot, options);
+  static IrcAdapter create(IrcOptions options) {
+    return new IrcAdapterImpl(options);
   }
 
 

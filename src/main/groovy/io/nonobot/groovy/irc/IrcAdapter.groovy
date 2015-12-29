@@ -20,7 +20,6 @@ import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
 import io.nonobot.irc.IrcOptions
 import io.nonobot.groovy.core.adapter.BotAdapter
-import io.nonobot.groovy.core.NonoBot
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
 */
@@ -34,8 +33,8 @@ public class IrcAdapter extends BotAdapter {
   public Object getDelegate() {
     return delegate;
   }
-  public static IrcAdapter create(NonoBot bot, Map<String, Object> options) {
-    def ret= InternalHelper.safeCreate(io.nonobot.irc.IrcAdapter.create((io.nonobot.core.NonoBot)bot.getDelegate(), options != null ? new io.nonobot.irc.IrcOptions(new io.vertx.core.json.JsonObject(options)) : null), io.nonobot.groovy.irc.IrcAdapter.class);
+  public static IrcAdapter create(Map<String, Object> options = [:]) {
+    def ret= InternalHelper.safeCreate(io.nonobot.irc.IrcAdapter.create(options != null ? new io.nonobot.irc.IrcOptions(new io.vertx.core.json.JsonObject(options)) : null), io.nonobot.groovy.irc.IrcAdapter.class);
     return ret;
   }
 }

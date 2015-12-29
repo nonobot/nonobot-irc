@@ -21,7 +21,6 @@ import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.nonobot.irc.IrcOptions;
 import io.nonobot.rxjava.core.adapter.BotAdapter;
-import io.nonobot.rxjava.core.NonoBot;
 
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
@@ -43,8 +42,8 @@ public class IrcAdapter extends BotAdapter {
     return delegate;
   }
 
-  public static IrcAdapter create(NonoBot bot, IrcOptions options) { 
-    IrcAdapter ret= IrcAdapter.newInstance(io.nonobot.irc.IrcAdapter.create((io.nonobot.core.NonoBot) bot.getDelegate(), options));
+  public static IrcAdapter create(IrcOptions options) { 
+    IrcAdapter ret= IrcAdapter.newInstance(io.nonobot.irc.IrcAdapter.create(options));
     return ret;
   }
 

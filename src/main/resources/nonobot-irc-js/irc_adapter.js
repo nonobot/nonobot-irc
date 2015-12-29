@@ -17,7 +17,6 @@
 /** @module nonobot-irc-js/irc_adapter */
 var utils = require('vertx-js/util/utils');
 var BotAdapter = require('nonobot-js/bot_adapter');
-var NonoBot = require('nonobot-js/nono_bot');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
@@ -43,14 +42,13 @@ var IrcAdapter = function(j_val) {
 /**
 
  @memberof module:nonobot-irc-js/irc_adapter
- @param bot {NonoBot} 
  @param options {Object} 
  @return {IrcAdapter}
  */
-IrcAdapter.create = function(bot, options) {
+IrcAdapter.create = function(options) {
   var __args = arguments;
-  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
-    return utils.convReturnVertxGen(JIrcAdapter["create(io.nonobot.core.NonoBot,io.nonobot.irc.IrcOptions)"](bot._jdel, options != null ? new IrcOptions(new JsonObject(JSON.stringify(options))) : null), IrcAdapter);
+  if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
+    return utils.convReturnVertxGen(JIrcAdapter["create(io.nonobot.irc.IrcOptions)"](options != null ? new IrcOptions(new JsonObject(JSON.stringify(options))) : null), IrcAdapter);
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
