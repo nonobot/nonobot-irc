@@ -6,6 +6,7 @@ import io.nonobot.irc.IrcAdapter;
 import io.nonobot.core.client.BotClient;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
+import org.pircbotx.Channel;
 import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.ListenerAdapter;
@@ -14,6 +15,7 @@ import org.pircbotx.hooks.events.DisconnectEvent;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.events.PrivateMessageEvent;
 import org.pircbotx.hooks.types.GenericUserEvent;
+import org.pircbotx.output.OutputChannel;
 
 import javax.net.SocketFactory;
 import java.io.IOException;
@@ -87,6 +89,21 @@ public class IrcAdapterImpl implements IrcAdapter {
     @Override
     public void onConnect(ConnectEvent<PircBotX> event) throws Exception {
       client.rename(event.getBot().getNick());
+      client.messageHandler(msg -> {
+        Channel channel = bot.getUserChannelDao().getChannel(msg.chatId());
+        if (channel != null) {
+          context.executeBlocking(fut -> {
+            OutputChannel output = channel.send();
+            String[] lines = msg.body().split("\\r?\\n");
+            for (String line : lines) {
+              output.message(line);
+            }
+          }, res -> {});
+        } else {
+          System.out.println("Could not send message to " + msg.chatId());
+        }
+        System.out.println("should post back to " + msg.chatId());
+      });
       if (!completion.isComplete()) {
         completion.complete();
       }
@@ -99,17 +116,17 @@ public class IrcAdapterImpl implements IrcAdapter {
 
     @Override
     public void onMessage(MessageEvent<PircBotX> event) throws Exception {
-      processMessage(event, event.getMessage());
+      processMessage(event, event.getChannel().getName(), event.getMessage());
     }
 
     @Override
     public void onPrivateMessage(PrivateMessageEvent<PircBotX> event) throws Exception {
-      processMessage(event, event.getMessage());
+      processMessage(event, event.getUser().getNick(), event.getMessage());
     }
 
-    private void processMessage(GenericUserEvent<PircBotX> event, String msg) {
+    private void processMessage(GenericUserEvent<PircBotX> event, String chatId, String msg) {
       System.out.println("Processing IRC message by " + event.getUser().getNick() + ": " + msg);
-      client.receiveMessage(new ReceiveOptions(), msg, ar -> {
+      client.receiveMessage(new ReceiveOptions().setChatId(chatId), msg, ar -> {
         if (ar.succeeded()) {
           String reply = ar.result();
           context.executeBlocking(fut -> {
