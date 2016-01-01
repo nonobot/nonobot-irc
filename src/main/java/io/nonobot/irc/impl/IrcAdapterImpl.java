@@ -1,11 +1,12 @@
 package io.nonobot.irc.impl;
 
+import io.nonobot.core.adapter.ConnectionRequest;
 import io.nonobot.core.client.ReceiveOptions;
 import io.nonobot.irc.IrcOptions;
-import io.nonobot.irc.IrcAdapter;
 import io.nonobot.core.client.BotClient;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import org.pircbotx.Channel;
 import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;
@@ -25,7 +26,7 @@ import java.net.Socket;
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
-public class IrcAdapterImpl implements IrcAdapter {
+public class IrcAdapterImpl implements Handler<ConnectionRequest> {
 
   private final IrcOptions options;
   private Runner runner;
@@ -35,14 +36,15 @@ public class IrcAdapterImpl implements IrcAdapter {
   }
 
   @Override
-  public void connect(BotClient client, Future<Void> completionHandler) {
+  public void handle(ConnectionRequest request) {
     if (runner != null) {
       throw new IllegalStateException();
     }
-    Context context = client.bot().vertx().getOrCreateContext();
+    BotClient client = request.client();
+    Context context = client.vertx().getOrCreateContext();
     String name = options.getName();
     if (name == null) {
-      name = client.bot().name();
+      name = client.name();
     }
     Configuration.Builder<PircBotX> config = new Configuration.Builder<>().
         setName(name).
@@ -56,15 +58,15 @@ public class IrcAdapterImpl implements IrcAdapter {
     for (String channel : options.getChannels()) {
       config = config.addAutoJoinChannel(channel);
     }
-    runner = new Runner(client, config, context, completionHandler);
-    runner.thread.start();
-  }
 
-  @Override
-  public synchronized void close() {
-    if (runner != null) {
-      runner.thread.interrupt();
-    }
+    client.closeHandler(v -> {
+      if (runner != null) {
+        runner.thread.interrupt();
+      }
+    });
+
+    runner = new Runner(client, config, context, request);
+    runner.thread.start();
   }
 
   class Runner extends ListenerAdapter<PircBotX> implements Runnable {
@@ -88,7 +90,7 @@ public class IrcAdapterImpl implements IrcAdapter {
 
     @Override
     public void onConnect(ConnectEvent<PircBotX> event) throws Exception {
-      client.rename(event.getBot().getNick());
+      client.alias(event.getBot().getNick());
       client.messageHandler(msg -> {
         Channel channel = bot.getUserChannelDao().getChannel(msg.chatId());
         if (channel != null) {

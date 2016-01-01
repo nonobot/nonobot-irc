@@ -3,6 +3,7 @@ package io.nonobot.irc;
 import io.nonobot.core.Config;
 import io.nonobot.core.adapter.BotAdapter;
 import io.nonobot.core.spi.BotAdapterFactory;
+import io.vertx.core.Vertx;
 
 import java.util.Arrays;
 
@@ -12,8 +13,9 @@ import java.util.Arrays;
 public class IrcAdapterFactory implements BotAdapterFactory {
 
   @Override
-  public BotAdapter create(Config config) {
+  public BotAdapter create(Vertx vertx, Config config) {
     String ircChannels = config.getProperty("irc.channels");
+
     if (ircChannels != null) {
       IrcOptions options = new IrcOptions();
       Arrays.asList(ircChannels.split("\\s*,\\s*")).forEach(options::addChannel);;
@@ -33,7 +35,7 @@ public class IrcAdapterFactory implements BotAdapterFactory {
       if (ircPort != null) {
         options.setPort(Integer.parseInt(ircPort));
       }
-      return IrcAdapter.create(options);
+      return IrcAdapter.create(vertx, options);
     }
     return null;
   }
