@@ -20,7 +20,10 @@ import java.util.Map;
 import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.nonobot.irc.IrcOptions;
+import io.nonobot.rxjava.core.adapter.ConnectionRequest;
 import io.nonobot.rxjava.core.adapter.BotAdapter;
+import io.vertx.rxjava.core.Vertx;
+import io.vertx.core.Handler;
 
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
@@ -29,12 +32,11 @@ import io.nonobot.rxjava.core.adapter.BotAdapter;
  * NOTE: This class has been automatically generated from the {@link io.nonobot.irc.IrcAdapter original} non RX-ified interface using Vert.x codegen.
  */
 
-public class IrcAdapter extends BotAdapter {
+public class IrcAdapter implements Handler<ConnectionRequest> {
 
   final io.nonobot.irc.IrcAdapter delegate;
 
   public IrcAdapter(io.nonobot.irc.IrcAdapter delegate) {
-    super(delegate);
     this.delegate = delegate;
   }
 
@@ -42,8 +44,12 @@ public class IrcAdapter extends BotAdapter {
     return delegate;
   }
 
-  public static IrcAdapter create(IrcOptions options) { 
-    IrcAdapter ret= IrcAdapter.newInstance(io.nonobot.irc.IrcAdapter.create(options));
+  public void handle(ConnectionRequest arg0) { 
+    this.delegate.handle((io.nonobot.core.adapter.ConnectionRequest) arg0.getDelegate());
+  }
+
+  public static BotAdapter create(Vertx vertx, IrcOptions options) { 
+    BotAdapter ret= BotAdapter.newInstance(io.nonobot.irc.IrcAdapter.create((io.vertx.core.Vertx) vertx.getDelegate(), options));
     return ret;
   }
 

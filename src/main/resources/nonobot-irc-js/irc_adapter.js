@@ -16,7 +16,9 @@
 
 /** @module nonobot-irc-js/irc_adapter */
 var utils = require('vertx-js/util/utils');
+var ConnectionRequest = require('nonobot-js/connection_request');
 var BotAdapter = require('nonobot-js/bot_adapter');
+var Vertx = require('vertx-js/vertx');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
@@ -31,7 +33,18 @@ var IrcAdapter = function(j_val) {
 
   var j_ircAdapter = j_val;
   var that = this;
-  BotAdapter.call(this, j_val);
+
+  /**
+
+   @public
+   @param arg0 {ConnectionRequest} 
+   */
+  this.handle = function(arg0) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+      j_ircAdapter["handle(io.nonobot.core.adapter.ConnectionRequest)"](arg0._jdel);
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
 
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
@@ -42,13 +55,14 @@ var IrcAdapter = function(j_val) {
 /**
 
  @memberof module:nonobot-irc-js/irc_adapter
+ @param vertx {Vertx} 
  @param options {Object} 
- @return {IrcAdapter}
+ @return {BotAdapter}
  */
-IrcAdapter.create = function(options) {
+IrcAdapter.create = function(vertx, options) {
   var __args = arguments;
-  if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-    return utils.convReturnVertxGen(JIrcAdapter["create(io.nonobot.irc.IrcOptions)"](options != null ? new IrcOptions(new JsonObject(JSON.stringify(options))) : null), IrcAdapter);
+  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
+    return utils.convReturnVertxGen(JIrcAdapter["create(io.vertx.core.Vertx,io.nonobot.irc.IrcOptions)"](vertx._jdel, options != null ? new IrcOptions(new JsonObject(JSON.stringify(options))) : null), BotAdapter);
   } else throw new TypeError('function invoked with invalid arguments');
 };
 

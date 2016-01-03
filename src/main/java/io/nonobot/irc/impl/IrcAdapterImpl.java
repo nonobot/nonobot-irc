@@ -92,7 +92,11 @@ public class IrcAdapterImpl implements Handler<ConnectionRequest> {
     public void onConnect(ConnectEvent<PircBotX> event) throws Exception {
       client.alias(event.getBot().getNick());
       client.messageHandler(msg -> {
-        Channel channel = bot.getUserChannelDao().getChannel(msg.chatId());
+        String chatId = msg.chatId();
+        if (chatId.startsWith("@")) {
+          chatId = chatId.substring(1);
+        }
+        Channel channel = bot.getUserChannelDao().getChannel(chatId);
         if (channel != null) {
           context.executeBlocking(fut -> {
             OutputChannel output = channel.send();
@@ -102,9 +106,9 @@ public class IrcAdapterImpl implements Handler<ConnectionRequest> {
             }
           }, res -> {});
         } else {
-          System.out.println("Could not send message to " + msg.chatId());
+          System.out.println("Could not send message to " + chatId);
         }
-        System.out.println("should post back to " + msg.chatId());
+        System.out.println("should post back to " + chatId);
       });
       if (!completion.isComplete()) {
         completion.complete();
@@ -123,11 +127,11 @@ public class IrcAdapterImpl implements Handler<ConnectionRequest> {
 
     @Override
     public void onPrivateMessage(PrivateMessageEvent<PircBotX> event) throws Exception {
-      processMessage(event, event.getUser().getNick(), event.getMessage());
+      processMessage(event, "@" + event.getUser().getNick(), event.getMessage());
     }
 
     private void processMessage(GenericUserEvent<PircBotX> event, String chatId, String msg) {
-      System.out.println("Processing IRC message by " + event.getUser().getNick() + ": " + msg);
+      System.out.println("Processing IRC message by " + event.getUser().getNick() + " chatId=" + chatId + ": " + msg);
       client.receiveMessage(new ReceiveOptions().setChatId(chatId), msg, ar -> {
         if (ar.succeeded()) {
           String reply = ar.result();
